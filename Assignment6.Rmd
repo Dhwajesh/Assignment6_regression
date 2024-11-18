@@ -1,0 +1,94 @@
+---
+title: "Assignment6_Regression"
+author: "Dhwajesh Bhandari"
+date: "2024-11-16"
+output: html_document
+---
+
+```{r}
+# Loading necessary libraries
+library(readxl)
+library(fpp2)
+library(ggplot2)
+
+# Load the new data
+file_path <- ("/Users/dhwajeshbhandari/Desktop/Passenger.xlsx")
+flightVolume <- read_excel(file_path, sheet = "Sheet1")
+
+
+
+# Create an independent variable (e.g., Month_Index as a linear predictor)
+data <- data.frame(
+  Month_Index = seq_along(flightVolume$International), 
+  International = flightVolume$International
+)
+
+# Fit a linear regression model
+regression_model <- lm(International ~ Month_Index, data = data)
+
+# Summary of the regression model
+summary(regression_model)
+
+# Plot the regression line
+ggplot(data, aes(x = Month_Index, y = International)) +
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
+  labs(
+    title = "Regression of International Passengers on Month Index",
+    x = "Month Index",
+    y = "International Passengers"
+  )
+
+# Display Adjusted R-Squared, F-statistic, and significance of coefficients
+model_summary <- summary(regression_model)
+cat("Adjusted R-Squared: ", model_summary$adj.r.squared, "\n")
+cat("F-Statistic: ", model_summary$fstatistic[1], "\n")
+cat("P-Value of Model: ", 
+    pf(model_summary$fstatistic[1], model_summary$fstatistic[2], model_summary$fstatistic[3], lower.tail = FALSE), 
+    "\n")
+
+# Residual Analysis
+residuals <- residuals(regression_model)
+
+# Residuals vs. Month Index
+ggplot(data, aes(x = Month_Index, y = residuals)) +
+  geom_point(color = "blue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Residuals vs. Month Index", x = "Month Index", y = "Residuals")
+
+# Histogram of residuals
+residuals_df <- data.frame(
+  Index = seq_along(residuals), 
+  Residuals = residuals
+)
+ggplot(residuals_df, aes(x = Index, y = Residuals)) +
+  geom_bar(stat = "identity", fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Bar Chart of Residuals", x = "Index", y = "Residuals") +
+  theme_minimal()
+
+
+# QQ Plot for residuals
+qqnorm(residuals, main = "QQ Plot of Residuals")
+qqline(residuals, col = "red")
+
+##Insights
+#From the histogram of residuals that are presented below, there is evidence that residuals are not perfectly normally distributed. This therefore partly raises questions about the normality assumption for the linear regression model used in this study.
+#On the Residuals vs. Fitted plot, when the residuals are plotted against the fitted values, an upward opening funnel-shape (or a fan shape) suggests heteroscedasticity. This goes against the constant variance assumption made in linear regression, and often requires transformation of the data or a need to use a different model.
+#In the case of the Residuals vs Fitted plot the horizontal red line represents the zero residual line which indicates where residuals would lay if the fitted model was perfect. The systematic pattern around the line indicates that some regions of the model are underfitted or overfitted.
+#From the QQ plot, we can see that the residuals are not actually all over the place, and this is evident by the fact that there is a twist from the straight reference line at the ends, so we can actually ascertain that the residuals are not normally distributed.
+
+##Conclusion
+#Month_Index is the predictor variable employed by the regression model to estimate International passenger traffic. , through rebuttal analysis, there is presence of heteroscedasticity and non-normality, which play viods key regression model assumptions as provided by the model. In these cases, maybe different transformations or other regression models need to be carried out.
+
+
+
+
+
+
+
+
+
+
+
+```
+
